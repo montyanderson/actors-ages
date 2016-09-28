@@ -1,5 +1,6 @@
 const got = require("got");
-const db = require("redis").createClient();
+const Redis = require("ioredis");
+const db = new Redis();
 
 const api_key = "47af9eaa74dc6edd71d7200f8a78a35a";
 
@@ -28,12 +29,7 @@ got("https://api.themoviedb.org/3/person/popular?api_key=" + api_key)
 		multi.zadd("people", p.age, p.id);
 	});
 
-	return new Promise((resolve, reject) => {
-		multi.exec(err => {
-			if(err) return reject();
-			resolve();
-		});
-	});
+	return multi.exec();
 })
 .then(() => {
 	console.log("Done!");

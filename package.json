@@ -18,6 +18,7 @@
   "homepage": "https://github.com/montyanderson/actors-ages#readme",
   "dependencies": {
     "got": "^6.5.0",
+    "ioredis": "^2.4.0",
     "redis": "^2.6.2"
   }
 }
