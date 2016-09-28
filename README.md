@@ -109,7 +109,7 @@ $ node index.js
 
 We now have a profile for each of the popular people!
 
-## Storing actors in redis (and querying by age)
+## Storing actors in redis
 
 ``` javascript
 got("https://api.themoviedb.org/3/person/popular?api_key=" + api_key)
@@ -129,12 +129,12 @@ got("https://api.themoviedb.org/3/person/popular?api_key=" + api_key)
 
 	people.forEach(p => {
 		const birthday = new Date(p.birthday);
-		const age = Math.floor((Date.now() - birthday) / (1000*60*60*24*365.25));
+		p.age = Math.floor((Date.now() - birthday) / (1000*60*60*24*365.25));
 
-		console.log(p.id, age);
+		console.log(p.id, p.age);
 
 		multi.set("person:" + p.id, JSON.stringify(p));
-		multi.zadd("people", age, p.id);
+		multi.zadd("people", p.age, p.id);
 	});
 
 	return new Promise((resolve, reject) => {
@@ -152,4 +152,54 @@ got("https://api.themoviedb.org/3/person/popular?api_key=" + api_key)
 });
 ```
 
-* We calculate their age from their birthday
+## Querying actors by age
+
+``` javascript
+const db = require("redis").createClient();
+
+function getByAge(min, max) {
+	return new Promise((resolve, reject) => {
+		db.zrangebyscore("people", min, max || min, (err, ids) => {
+			if(err) return reject(err);
+
+			const query = db.multi();
+
+			ids.forEach(id => query.get("person:" + id));
+
+			query.exec((err, people) => {
+				if(err) return reject();
+				resolve(people.map(JSON.parse));
+			});
+		});
+	});
+}
+
+getByAge(30, 45).then(people => {
+	console.log(people);
+}).catch(err => console.log(err));
+```
+
+This will return all the actors between the specified ages!
+
+```
+$ node query.js
+[ { adult: false,
+    also_known_as: [ 'Alex Daddario', 'Alexandra Daddorio ' ],
+    biography: 'Alexandra Anna Daddario (born March 16, 1986) is an American actress, known to film audiences as Annabeth Chase in the 2010 film Percy Jackson &amp; the Olympians: The Lightning Thief. Daddario was also in The Squid and the Whale, All My Children, The Babysitters, The Attic, The Hottest State, White Collar, It\'s Always Sunny in Philadelphia, and Bereavement. She will star as the protagonist "Heather Miller" in the 2013 horror film Texas Chainsaw 3D.',
+    birthday: '1986-03-16',
+    deathday: '',
+    gender: 1,
+    homepage: '',
+    id: 109513,
+    imdb_id: 'nm1275259',
+    name: 'Alexandra Daddario',
+    place_of_birth: 'New York City, New York, USA',
+    popularity: 19.173467,
+    profile_path: '/idDAi1sjaHDIlDc78D8G9HaJ8le.jpg',
+    age: 30 },
+
+```
+
+## Keeping code modular by making an actor class
+
+Coming soon!

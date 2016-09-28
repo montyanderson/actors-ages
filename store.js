@@ -20,12 +20,12 @@ got("https://api.themoviedb.org/3/person/popular?api_key=" + api_key)
 
 	people.forEach(p => {
 		const birthday = new Date(p.birthday);
-		const age = Math.floor((Date.now() - birthday) / (1000*60*60*24*365.25));
+		p.age = Math.floor((Date.now() - birthday) / (1000*60*60*24*365.25));
 
-		console.log(p.id, age);
+		console.log(p.id, p.age);
 
 		multi.set("person:" + p.id, JSON.stringify(p));
-		multi.zadd("people", age, p.id);
+		multi.zadd("people", p.age, p.id);
 	});
 
 	return new Promise((resolve, reject) => {
