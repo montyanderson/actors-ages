@@ -200,6 +200,31 @@ $ node query.js
 
 ```
 
+### Filtering by gender
+
+``` javascript
+getByAge(30, 45).then(people => {
+	const women = people.filter(p => p.gender == 1);
+	const men = people.filter(p => p.gender == 2);
+
+	console.log(women, men);
+}).catch(err => console.log(err));
+```
+
+Because
+
+``` javascript
+const women = people.filter(p => p.gender == 1);
+```
+
+is the same as
+
+``` javascript
+const women = people.filter(function(person) {
+	return person.gender == 1;
+});
+```
+
 ## Keeping code modular by making an actor class
 
 Coming soon!

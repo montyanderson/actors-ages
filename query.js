@@ -18,5 +18,8 @@ function getByAge(min, max) {
 }
 
 getByAge(30, 45).then(people => {
-	console.log(people);
+	const women = people.filter(p => p.gender == 1);
+	const men = people.filter(p => p.gender == 2);
+
+	console.log(women, men);
 }).catch(err => console.log(err));
