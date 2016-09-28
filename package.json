@@ -1,0 +1,23 @@
+{
+  "name": "actors-ages",
+  "version": "1.0.0",
+  "description": "Querying actors by age with redis.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montyanderson/actors-ages.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/montyanderson/actors-ages/issues"
+  },
+  "homepage": "https://github.com/montyanderson/actors-ages#readme",
+  "dependencies": {
+    "got": "^6.5.0",
+    "redis": "^2.6.2"
+  }
+}
