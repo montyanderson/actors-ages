@@ -6,7 +6,8 @@ Querying actors by age with redis.
 ### Packages used in this example
 
 * [got](https://www.npmjs.com/package/got), a http request library
-* [redis](https://www.npmjs.com/package/redis), a redis client library
+* ~~[redis](https://www.npmjs.com/package/redis), a redis client library~~
+* [ioredis](https://www.npmjs.com/package/ioredis), a redis client library (that supports Promises)
 
 ### Setup
 
@@ -137,12 +138,7 @@ got("https://api.themoviedb.org/3/person/popular?api_key=" + api_key)
 		multi.zadd("people", p.age, p.id);
 	});
 
-	return new Promise((resolve, reject) => {
-		multi.exec(err => {
-			if(err) return reject();
-			resolve();
-		});
-	});
+	return multi.exec();
 })
 .then(() => {
 	console.log("Done!");
@@ -155,28 +151,16 @@ got("https://api.themoviedb.org/3/person/popular?api_key=" + api_key)
 ## Querying actors by age
 
 ``` javascript
-const db = require("redis").createClient();
-
 function getByAge(min, max) {
-	return new Promise((resolve, reject) => {
-		db.zrangebyscore("people", min, max || min, (err, ids) => {
-			if(err) return reject(err);
-
-			const query = db.multi();
-
-			ids.forEach(id => query.get("person:" + id));
-
-			query.exec((err, people) => {
-				if(err) return reject();
-				resolve(people.map(JSON.parse));
-			});
-		});
-	});
+	return db.zrangebyscore("people", min, max || min)
+		.then(ids => ids.map(id => db.get("person:" + id)))
+		.then(ids => Promise.all(ids));
 }
 
 getByAge(30, 45).then(people => {
 	console.log(people);
 }).catch(err => console.log(err));
+
 ```
 
 This will return all the actors between the specified ages!
